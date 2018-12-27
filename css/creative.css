@@ -26,14 +26,14 @@ hr.light {
 
 a {
   /*color: #F05F40;*/
-  color: #007BB8;
+  color: #0C6E7B;
 
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
 }
 
 a:hover {
-  color: #007BB8;
+  color: #0C6E7B;
 }
 
 h1,
@@ -47,7 +47,7 @@ h6 {
 
 .bg-primary {
   /*background-color: #F05F40 !important;*/
-  background-color: #007BB8 !important;
+  background-color: #0C6E7B !important;
 
 }
 
@@ -106,12 +106,12 @@ img::-moz-selection {
 #mainNav .navbar-brand {
   font-weight: 700;
   text-transform: uppercase;
-  color: #007BB8;
+  color: #0C6E7B;
   font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
 
 #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
-  color: #007BB8;
+  color: #0C6E7B;
 }
 
 #mainNav .navbar-nav > li.nav-item > a.nav-link,
@@ -119,17 +119,17 @@ img::-moz-selection {
   font-size: .9rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #212529;
+  color: #0C6E7B;
 }
 
 #mainNav .navbar-nav > li.nav-item > a.nav-link:hover,
 #mainNav .navbar-nav > li.nav-item > a.nav-link:focus:hover {
-  color: #007BB8;
+  color: #0C6E7B;
 }
 
 #mainNav .navbar-nav > li.nav-item > a.nav-link.active,
 #mainNav .navbar-nav > li.nav-item > a.nav-link:focus.active {
-  color: #007BB8 !important;
+  color: #0C6E7B !important;
   background-color: transparent;
 }
 
@@ -165,10 +165,10 @@ img::-moz-selection {
     background-color: #fff;
   }
   #mainNav.navbar-shrink .navbar-brand {
-    color: #007BB8;
+    color: #0C6E7B;
   }
   #mainNav.navbar-shrink .navbar-brand:focus, #mainNav.navbar-shrink .navbar-brand:hover {
-    color: #007BB8;
+    color: #0C6E7B;
   }
   #mainNav.navbar-shrink .navbar-nav > li.nav-item > a.nav-link,
   #mainNav.navbar-shrink .navbar-nav > li.nav-item > a.nav-link:focus {
@@ -176,7 +176,7 @@ img::-moz-selection {
   }
   #mainNav.navbar-shrink .navbar-nav > li.nav-item > a.nav-link:hover,
   #mainNav.navbar-shrink .navbar-nav > li.nav-item > a.nav-link:focus:hover {
-    color: #007BB8;
+    color: #0C6E7B;
   }
 }
 
@@ -293,7 +293,7 @@ header.masthead p {
 }
 
 .text-primary {
-  color: #007BB8 !important;
+  color: #0C6E7B !important;
 }
 
 .text-secondary {
@@ -313,8 +313,8 @@ header.masthead p {
 }
 
 .btn-primary {
-  background-color: #007BB8;
-  border-color: #007BB8;
+  background-color: #0C6E7B;
+  border-color: #0C6E7B;
   background-color: Transparent;
 
 }
