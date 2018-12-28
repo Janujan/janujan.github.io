@@ -60,6 +60,9 @@ h6 {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.text-faded-black {
+  color: rgba(0, 0, 0, 0.7);
+}
 section {
   padding: 8rem 0;
 }
@@ -245,7 +248,7 @@ header.masthead p {
   text-align: center;
   opacity: 0;
   color: #fff;
-  background: rgba(240, 95, 64, 0.9);
+  background: #0C6E7B;
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
 }
@@ -510,4 +513,9 @@ header.masthead p {
   #timeline .timeline-item .timeline-icon {
     left: 0;
   }
+}
+
+
+#corners{
+  border-radius:15px;
 }
