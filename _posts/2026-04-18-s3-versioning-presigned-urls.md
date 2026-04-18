@@ -1,6 +1,6 @@
 ---
 title: "Serving Fresh Files with S3 Versioning and Presigned URLs"
-date: 2026-04-18 00:00:00 +0000
+date: 2026-04-18 12:00:00 +0000
 categories: [AWS, Backend]
 tags: [s3, aws, distributed-systems, python]
 ---
