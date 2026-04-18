@@ -16,6 +16,8 @@ The basic interaction looks like this:
 
 The interesting part of this problem is trying to serve the freshest version of these files in the most efficient way.
 
+![Service interaction diagram](/assets/img/posts/Pasted-image-20260415193651.png)
+
 ## S3 Primer
 
 S3 stores files as objects inside a **bucket**, which you can think of as a root folder accessible to any server with the right permissions. Within a bucket, each file lives at a specific key, analogous to a file path: `bucketA/some/path/to/fileA`.
@@ -32,6 +34,8 @@ The simplest way to solve this problem would be to pass through the file from th
 
 But how long is the client stuck waiting? Let's say the time to download/upload a file takes time `t`. When a request is made, our server will download the file once and upload to our S3 bucket. That will take time `2t` before we can serve the download link to the client. (We can assume download time >> time for network hops, server latency, 3rd party API latency). If we say `t` is roughly ~500ms, the client is stuck waiting 1 second until a file link is ready. In most use-cases, like serving the file in a frontend, waiting 1 second just to get a download link leads to a poor customer experience.
 
+![Level 1 diagram](/assets/img/posts/Pasted-image-20260415193500.png)
+
 Let's also consider the server compute perspective; every time a client wants to download a file, our server has to download the file from the external service and upload the file to an S3 bucket. What if the **same** file is requested by 1000 different clients? We'll need to download and upload the same file 1000 times(!)
 
 ### Level 2: Cache files and scheduled update
@@ -39,6 +43,8 @@ Let's also consider the server compute perspective; every time a client wants to
 Let's address the issue of downloading the same file so many times. We only need to manage and store 1000 files, why not pull those files early and serve them directly from our S3 bucket? We can remove the download/upload from the critical path when returning the download link to clients.
 
 We'll use a parallel processing path that triggers daily to fetch the files from the external service and store them into S3. We run this daily, accepting a one-day lag in exchange for removing file fetching from the critical path. In our case, files updated daily by the external team made this lag acceptable. When a client requests a file, we just check it exists in the bucket and generate a presigned URL. We effectively freed up `2t` of latency in the critical path while still maintaining the freshness requirement.
+
+![Level 2 diagram](/assets/img/posts/Pasted-image-20260415201018.png)
 
 But should we delete files or overwrite them as new ones become available? We should avoid deleting files without verifying the latest version is valid and safe to serve. We can use the overwrite feature in S3 in a versioned bucket: upload files to consistent S3 keys (`bucketA/path/to/fileA`) and maintain the last 3 versions. Keeping a few earlier versions lets us roll back up to 3 days if we detect corrupt or erroneous downloads. To avoid exploding storage costs, we can set a lifecycle rule in S3 to delete any file versions older than the 3 latest versions.
 
@@ -132,6 +138,8 @@ S3 overwrites are atomic. While the overwrite was in progress, version 1 was sti
 What if all the files don't actually change that often? With the above approach, we have to check whether each of the 1000 files has changed and trigger a download. Some scheduled runs may find nothing has changed, making the entire invocation wasteful.
 
 We can change the communication model with the external service to notify us when a file has changed; doing so would eliminate the wasteful executions when nothing has changed. This way we know exactly when to update and serve the latest version as needed.
+
+![Level 3 diagram](/assets/img/posts/Pasted-image-20260418114605.png)
 
 ## Conclusion
 
