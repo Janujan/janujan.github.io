@@ -3,6 +3,12 @@
     background: transparent !important;
   }
 
+  :root {
+    --main-bg: transparent !important;
+    --sidebar-bg: transparent !important;
+    --topbar-bg: transparent !important;
+  }
+
   #bg-canvas {
     position: fixed;
     top: 0;
@@ -11,112 +17,133 @@
     height: 100%;
     z-index: -1;
     pointer-events: none;
-    background: #1b1b1e;
+    background: white; /* default to light */
   }
 
-  :root {
-    --main-bg: transparent !important;
-    --sidebar-bg: transparent !important;
-    --topbar-bg: transparent !important;
+  @media (prefers-color-scheme: dark) {
+    #bg-canvas { background: #1b1b1e; }
   }
+
+  html[data-mode="dark"] #bg-canvas  { background: #1b1b1e; }
+  html[data-mode="light"] #bg-canvas { background: white; }
 </style>
 
-<canvas id="bg-canvas"></canvas>
-
 <script>
-  const canvas = document.getElementById('bg-canvas');
-  const ctx    = canvas.getContext('2d');
+  (function () {
+    const TILT       = -0.32;
+    let dashOffset   = 0;
+    let scrollOffset = 0;
 
-  const COLOR       = 'rgba(255, 255, 255, 0.22)';
-  const ORBIT_COLOR = 'rgba(255, 255, 255, 0.13)';
-  const TILT        = -0.32;
-  let dashOffset    = 0;
-  let scrollOffset  = 0;
+    const BASE_PLANETS = [
+      { rx: 100, ry: 34, size: 4.5, speed: 0.00022, angle: 1.0 },
+      { rx: 185, ry: 62, size: 6.0, speed: 0.00014, angle: 3.2 },
+      { rx: 285, ry: 96, size: 5.5, speed: 0.00008, angle: 5.5 },
+    ];
 
-  const BASE_PLANETS = [
-    { rx: 100, ry: 34, size: 4.5, speed: 0.00022, angle: 1.0 },
-    { rx: 185, ry: 62, size: 6.0, speed: 0.00014, angle: 3.2 },
-    { rx: 285, ry: 96, size: 5.5, speed: 0.00008, angle: 5.5 },
-  ];
+    const planets = BASE_PLANETS.map(p => ({ ...p }));
 
-  const planets = BASE_PLANETS.map(p => ({ ...p }));
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  window.addEventListener('scroll', () => { scrollOffset = window.scrollY * 0.004; });
-
-  function getScale() {
-    return Math.min(1, canvas.width / 1000);
-  }
-
-  function drawSun(cx, cy, scale) {
-    const r = 22 * scale;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.strokeStyle = COLOR;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    for (let i = 0; i < 20; i++) {
-      const a      = (i / 20) * Math.PI * 2;
-      const length = (i % 2 === 0 ? 2.5 : 1.5) * scale;
-      const gap    = 5 * scale;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a) * (r + gap), cy + Math.sin(a) * (r + gap));
-      ctx.lineTo(cx + Math.cos(a) * (r + gap + length), cy + Math.sin(a) * (r + gap + length));
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+    function isDark() {
+      const mode = document.documentElement.getAttribute('data-mode');
+      if (mode === 'dark') return true;
+      if (mode === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
-  }
 
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function getColors() {
+      return isDark()
+        ? { planet: 'rgba(255,255,255,0.22)', orbit: 'rgba(255,255,255,0.13)', ray: 'rgba(255,255,255,0.12)' }
+        : { planet: 'rgba(0,0,0,0.18)',       orbit: 'rgba(0,0,0,0.22)',       ray: 'rgba(0,0,0,0.1)'       };
+    }
 
-    const scale = getScale();
-    const cx    = canvas.width  * 0.78;
-    const cy    = canvas.height * 0.78;
+    function init() {
+      const canvas = document.createElement('canvas');
+      canvas.id = 'bg-canvas';
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
 
-    dashOffset -= 0.25;
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+      window.addEventListener('scroll', () => { scrollOffset = window.scrollY * 0.004; });
 
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(TILT);
-    ctx.translate(-cx, -cy);
+      function getScale() { return Math.min(1, canvas.width / 1000); }
 
-    ctx.setLineDash([4, 8]);
-    ctx.lineDashOffset = dashOffset;
-    ctx.strokeStyle = ORBIT_COLOR;
-    ctx.lineWidth = 0.8;
-    planets.forEach(p => {
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, p.rx * scale, p.ry * scale, 0, 0, Math.PI * 2);
-      ctx.stroke();
-    });
-    ctx.setLineDash([]);
-    ctx.lineDashOffset = 0;
+      function drawSun(cx, cy, scale, colors) {
+        const r = 22 * scale;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = colors.planet;
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-    drawSun(cx, cy, scale);
+        for (let i = 0; i < 20; i++) {
+          const a      = (i / 20) * Math.PI * 2;
+          const length = (i % 2 === 0 ? 2.5 : 1.5) * scale;
+          const gap    = 5 * scale;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * (r + gap), cy + Math.sin(a) * (r + gap));
+          ctx.lineTo(cx + Math.cos(a) * (r + gap + length), cy + Math.sin(a) * (r + gap + length));
+          ctx.strokeStyle = colors.ray;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
 
-    planets.forEach(p => {
-      p.angle += p.speed;
-      const a = p.angle + scrollOffset;
-      const x = cx + Math.cos(a) * p.rx * scale;
-      const y = cy + Math.sin(a) * p.ry * scale;
-      ctx.beginPath();
-      ctx.arc(x, y, p.size * scale, 0, Math.PI * 2);
-      ctx.strokeStyle = COLOR;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    });
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.restore();
-    requestAnimationFrame(draw);
-  }
+        const scale  = getScale();
+        const colors = getColors();
+        const cx     = canvas.width  * 0.78;
+        const cy     = canvas.height * 0.78;
 
-  requestAnimationFrame(draw);
+        dashOffset -= 0.25;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(TILT);
+        ctx.translate(-cx, -cy);
+
+        ctx.setLineDash([4, 8]);
+        ctx.lineDashOffset = dashOffset;
+        ctx.strokeStyle = colors.orbit;
+        ctx.lineWidth = 0.8;
+        planets.forEach(p => {
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, p.rx * scale, p.ry * scale, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+        ctx.setLineDash([]);
+        ctx.lineDashOffset = 0;
+
+        drawSun(cx, cy, scale, colors);
+
+        planets.forEach(p => {
+          p.angle += p.speed;
+          const a = p.angle + scrollOffset;
+          const x = cx + Math.cos(a) * p.rx * scale;
+          const y = cy + Math.sin(a) * p.ry * scale;
+          ctx.beginPath();
+          ctx.arc(x, y, p.size * scale, 0, Math.PI * 2);
+          ctx.strokeStyle = colors.planet;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+
+        ctx.restore();
+        requestAnimationFrame(draw);
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
 </script>
