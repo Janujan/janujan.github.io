@@ -28,8 +28,8 @@
   const canvas = document.getElementById('bg-canvas');
   const ctx    = canvas.getContext('2d');
 
-  const COLOR       = 'rgba(255, 255, 255, 0.7)';
-  const ORBIT_COLOR = 'rgba(255, 255, 255, 0.18)';
+  const COLOR       = 'rgba(255, 255, 255, 0.22)';
+  const ORBIT_COLOR = 'rgba(255, 255, 255, 0.13)';
   const TILT        = -0.32;
   let dashOffset    = 0;
   let scrollOffset  = 0;
@@ -69,7 +69,7 @@
       ctx.beginPath();
       ctx.moveTo(cx + Math.cos(a) * (r + gap), cy + Math.sin(a) * (r + gap));
       ctx.lineTo(cx + Math.cos(a) * (r + gap + length), cy + Math.sin(a) * (r + gap + length));
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
       ctx.lineWidth = 1;
       ctx.stroke();
     }
